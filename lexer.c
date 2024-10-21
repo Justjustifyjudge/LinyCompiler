@@ -96,6 +96,25 @@ static struct token* token_make_string(char start_delim, char end_delim){
     return token_create(&(struct token){.type=TOKEN_TYPE_STRING,.sval=buffer_ptr(buffer)});
 }
 
+static bool op_treated_as_one(char c){
+    return c=='('||c=='['||c=='.'||c=='*'||c=='?';
+}
+
+const char* read_op(){
+    bool single_operator=true;
+    char op=nextc();
+    struct buffer* buffer=buffer_create();
+    buffer_write(buffer,op);
+
+    if(!op_treated_as_one(op)){
+        op=peekc();
+        if()
+    }
+}
+static struct token* token_make_operator_or_string(){
+    return NULL;
+}
+
 struct token* read_next_token(){
     struct token* token=NULL;
     char c=peekc();
@@ -103,7 +122,9 @@ struct token* read_next_token(){
     {
         NUMERIC_CASE:
             token=token_make_number();
-
+            break;
+        OPERATOR_CASE_EXCLUDING_DIVISION:
+            token=token_make_operator_or_string();
             break;
         case '"':
             token=token_make_string('"','"');

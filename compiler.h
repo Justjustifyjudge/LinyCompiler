@@ -22,6 +22,25 @@ struct pos{
     case '8': \
     case '9'
 
+#define OPERATOR_CASE_EXCLUDING_DIVISION \
+    case '+': \
+    case '-': \
+    case '*': \
+    case '>': \
+    case '<': \
+    case '^': \
+    case '%': \
+    case '!': \
+    case '=': \
+    case '~': \
+    case '|': \
+    case '&': \
+    case '(': \
+    case '[': \
+    case ',': \
+    case '.': \
+    case '?'
+
 enum{
     LEXICAL_ANALYSIS_ALL_OK,
     LEXICAL_AYALYSIS_INPUT_ERROR
