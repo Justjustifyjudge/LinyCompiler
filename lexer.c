@@ -10,6 +10,8 @@
     }                               \
 
 
+struct token* read_next_token();
+
 static struct lex_process* lex_process;
 static struct token tmp_token;
 
@@ -41,7 +43,9 @@ struct token* token_create(struct token* _token){
     return &tmp_token;
 }
 
-
+static struct token* lexer_last_token(){
+    return vector_back_or_null(lex_process->token_vec);
+}
 
 static struct token* handle_whitespace(){
     struct token* last_token=lexer_last_token();
@@ -82,6 +86,10 @@ struct token* read_next_token(){
         NUMERIC_CASE:
             token=token_make_number();
 
+            break;
+        case ' ':
+        case '\t':
+            token=handle_whitespace();
             break;
         case EOF:
             //结束代码文本的全部词法分析
