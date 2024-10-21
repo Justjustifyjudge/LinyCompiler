@@ -1,5 +1,6 @@
 #include "compiler.h"
 #include <stdarg.h>
+#include <stdlib.h>
 
 struct lex_process_functions compiler_lex_functions={
     .next_char=compile_process_next_char,
@@ -8,8 +9,22 @@ struct lex_process_functions compiler_lex_functions={
 };
 
 void compiler_error(struct compile_process* compiler, const char* msg, ...){
-
+    va_list args;
+    va_start(args, msg);
+    vfprintf(stderr, msg, args);
+    va_end(args);
+    fprintf(stderr, "在第%i行,第%i列,%s文件\n", compiler->pos.line, compiler->pos.col, compiler->pos.filename);
+    exit(-1);
 }
+
+void compiler_warning(struct compile_process* compiler, const char* msg, ...){
+    va_list args;
+    va_start(args, msg);
+    vfprintf(stderr, msg, args);
+    va_end(args);
+    fprintf(stderr, "在第%i行\n,第%i列,%s文件\n", compiler->pos.line, compiler->pos.col, compiler->pos.filename);
+}
+
 int compile_file(const char *filename, const char *out_filename, int flags){
     struct compile_process* process=compile_process_create(filename, out_filename, flags);
     if(!process){
