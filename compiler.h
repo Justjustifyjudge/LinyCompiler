@@ -44,7 +44,25 @@ struct pos{
     case '[': \
     case ',': \
     case '.': \
+/*
+原代码：
     case '?'
+修改原因：
+    原代码中没有包含'/'，导致编译发生错误“未知的运算符”
+    林一凡，2024.10.22，20点11分
+*/  \
+    case '?': \
+    case '/'
+
+#define SYMBOL_CASE \
+    case '{': \
+    case '}': \
+    case ';': \
+    case ':': \
+    case '#': \
+    case '\\': \
+    case ')': \
+    case ']'
 
 enum{
     LEXICAL_ANALYSIS_ALL_OK,

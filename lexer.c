@@ -201,10 +201,18 @@ const char *read_op()
     }
     return ptr;
 }
+
 static void lex_new_expression(){
     lex_process->current_expression_count++;
     if(lex_process->current_expression_count==1){
         lex_process->parentheses_buffer=buffer_create();
+    }
+}
+
+static void lex_finish_expression(){
+    lex_process->current_expression_count--;
+    if(lex_process->current_expression_count<0){
+        compiler_error(lex_process->compiler, "没有找到匹配的开始括号\n");
     }
 }
 
@@ -225,10 +233,17 @@ static struct token *token_make_operator_or_string()
     if(op=='('){
         lex_new_expression();
     }
-    
+
     return token;
 }
-
+static struct token *token_make_symbol(){
+    char c=nextc();
+    if(c==')'){
+        lex_finish_expression();
+    }
+    struct token *token = token_create(&(struct token){.type=TOKEN_TYPE_SYMBOL,.cval=c});
+    return token;
+}
 struct token *read_next_token()
 {
     struct token *token = NULL;
@@ -241,8 +256,12 @@ struct token *read_next_token()
     OPERATOR_CASE_EXCLUDING_DIVISION:
         token = token_make_operator_or_string();
         break;
+    SYMBOL_CASE:
+        token= token_make_symbol();
+        break;
     case '"':
         token = token_make_string('"', '"');
+        break;
     case ' ':
     case '\t':
         token = handle_whitespace();
