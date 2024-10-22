@@ -147,4 +147,6 @@ struct vector* lex_process_tokens(struct lex_process* process);
 
 int lex(struct lex_process* process);
 
+bool token_is_keyword(struct token *token, const char* value);
+
 #endif // LINYCOMPILOR_H

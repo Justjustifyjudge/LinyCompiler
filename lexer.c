@@ -194,12 +194,39 @@ const char *read_op()
     if(!single_operator){
         if(!op_valid(ptr)){
             read_op_flush_back_keep_first(buffer);
+            ptr[1]=0x00;
         }
+    } else if(!op_valid(ptr)){
+        compiler_error(lex_process->compiler, "未知的运算符：%s\n",ptr);
     }
+    return ptr;
+}
+static void lex_new_expression(){
+    lex_process->current_expression_count++;
+    if(lex_process->current_expression_count==1){
+        lex_process->parentheses_buffer=buffer_create();
+    }
+}
+
+bool lex_is_in_expression(){
+    return lex_process->current_expression_count>0;
 }
 static struct token *token_make_operator_or_string()
 {
-    return NULL;
+    char op=peekc();
+    if(op=='<'){
+        struct token* last_token=lexer_last_token();
+        //处理形如"#include<lyf.h>"的情况
+        if(token_is_keyword(last_token,"include")){
+            return token_make_string('<','>');
+        }
+    }
+    struct token *token = token_create(&(struct token){.type=TOKEN_TYPE_OPERATOR,.sval=read_op()});
+    if(op=='('){
+        lex_new_expression();
+    }
+    
+    return token;
 }
 
 struct token *read_next_token()
