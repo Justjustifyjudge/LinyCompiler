@@ -25,6 +25,7 @@ void compiler_warning(struct compile_process* compiler, const char* msg, ...){
     fprintf(stderr, "在第%i行\n,第%i列,%s文件\n", compiler->pos.line, compiler->pos.col, compiler->pos.filename);
 }
 
+//编译函数入口
 int compile_file(const char *filename, const char *out_filename, int flags){
     struct compile_process* process=compile_process_create(filename, out_filename, flags);
     if(!process){

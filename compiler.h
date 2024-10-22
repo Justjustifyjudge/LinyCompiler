@@ -3,7 +3,12 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
+//判断两个char*是否相等的宏
+#define S_EQ(str1, str2) (str1&&str2&&(strcmp(str1, str2)==0))
+
+//标志编译文件（文件名）的第几行第几列
 struct pos{
     int line;
     int col;
@@ -70,7 +75,7 @@ struct token
         unsigned long long llnum;
         void* any;
     };
-    //
+    //与下一个token之间是否有空白需要跳过
     bool whitespace;
 
     const char* between_brackets;
@@ -109,16 +114,17 @@ enum{
 
 struct compile_process
 {
-    // 标志文件应该如何被编译的标志位
+    // 标志文件应该如何被编译的标志位，比如-o, -c, -S等
     int flags;
-
+    // 记录编译到的位置和编译文件名等信息
     struct pos pos;
+    // fp即被打开编译的文件，abs_path是文件的绝对路径
     struct compile_process_input_file
     {
         FILE* fp;
         const char* abs_path;
     } cfile;
-
+    // ofile是编译后的输出文件
     FILE* ofile;
     
 };

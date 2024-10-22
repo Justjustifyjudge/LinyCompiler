@@ -34,9 +34,12 @@ char compile_process_next_char(struct lex_process* lex_process){
     return c;
 }
 
+//获取下一个字符，但是不移动指针
 char compile_process_peek_char(struct lex_process* lex_process){
     struct compile_process* compiler=lex_process->compiler;
+    //偷偷看看下一个字符是啥，此时文件指针应当移动到下一个字符
     char c=getc(compiler->cfile.fp);
+    //把偷看到的字符给推回流里面，文件指针又移动回来
     ungetc(c, compiler->cfile.fp);
     return c;
 }
