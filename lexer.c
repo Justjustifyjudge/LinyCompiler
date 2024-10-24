@@ -253,6 +253,7 @@ bool is_keyword(char* str){
            S_EQ(str, "extern")||
            S_EQ(str, "restrict");
 }
+
 static struct token *token_make_operator_or_string()
 {
     char op=peekc();
@@ -278,6 +279,58 @@ static struct token *token_make_symbol(){
     struct token *token = token_create(&(struct token){.type=TOKEN_TYPE_SYMBOL,.cval=c});
     return token;
 }
+
+//读取单行注释完成词法token
+struct token* token_make_one_line_comment()
+{
+    struct buffer* buffer=buffer_create();
+    char c=0;
+    LEX_GETC_IF(buffer,c,c!='\n'&&c!='\r'&&c!=EOF);
+    return token_create(&(struct token){.type=TOKEN_TYPE_COMMENT,.sval=buffer_ptr(buffer)});
+};
+//读取多行注释完成词法token
+struct token* token_make_multiline_comment(){
+    struct buffer* buffer=buffer_create();
+    char c=0;
+    while(1){
+        LEX_GETC_IF(buffer,c,c!='*'&&c!=EOF);
+        //读到代码文件结尾还没有结束注释则报错
+        if(c==EOF){
+            compiler_error(lex_process->compiler,"注释没有匹配的结束符\n");
+        }
+        //读到了"*"号
+        else if (c=='*')
+        {
+            //跳过*号
+            nextc();
+            //如果下一个字符是"/"则结束注释
+            if(peekc()=='/'){
+                nextc();
+                break;
+            }
+        }
+    }
+    return token_create(&(struct token){.type=TOKEN_TYPE_COMMENT,.sval=buffer_ptr(buffer)});
+}
+struct token* handle_comment(){
+    char c=peekc();
+    if(c=='/'){
+        nextc();
+        if(peekc()=='/'){
+            nextc();
+            return token_make_one_line_comment();
+        }
+        else if(peekc()=='*'){
+            nextc();
+            return token_make_multiline_comment();
+        }
+
+        pushc('/');
+        return token_make_operator_or_string();
+    }
+    return NULL;
+}
+
 static struct token* token_make_identifier_or_keyword(){
     struct buffer* buffer=buffer_create();
     char c=0;
@@ -309,6 +362,12 @@ struct token *read_next_token()
 {
     struct token *token = NULL;
     char c = peekc();
+    //先尝试一下看看是不是无效的代码（注释）
+    token = handle_comment();
+    if (token != NULL){
+        return token;
+    }
+    //如果不是注释再根据字符类型来生成token
     switch (c)
     {
     NUMERIC_CASE:
