@@ -40,6 +40,12 @@ static char pushc(char c)
     lex_process->functions->push_char(lex_process, c);
 }
 
+//如果没有匹配到对应的下一个字符，发生assert
+static char assert_next_char(char c){
+    char next = nextc();
+    assert(next == c);
+    return next;
+}
 static struct pos lex_file_position()
 {
     return lex_process->pos;
@@ -358,6 +364,33 @@ struct token* token_make_newline(){
     nextc();
     return token_create(&(struct token){.type=TOKEN_TYPE_NEWLINE});
 }
+char lex_get_escape_char(char c){
+    char co=0;
+    switch(c){
+        case 'n':co='\n';break;
+        case 'r':co='\r';break;
+        case 't':co='\t';break;
+        case '\\':co='\\';break;
+        case '\'':co='\'';break;
+    }
+    return co;
+}
+//处理单引号内包括的字符
+struct token* token_make_quote(){
+    assert_next_char('\'');//确保下一个字符是单引号
+    char c=nextc();
+    //转义字符
+    if(c=='\\'){
+        c=nextc();
+        c=lex_get_escape_char(c);
+    }
+    //如果单引号内超过了一个字符还没结束单引号
+    if(nextc()!='\''){
+        compiler_error(lex_process->compiler,"没有匹配结束的单引号或者单引号内超过了一个字符或者单引号内没有字符\n");
+    }
+    //返回的是0~255的字符
+    return token_create(&(struct token){.type=TOKEN_TYPE_NUMBER,.cval=c});
+}
 struct token *read_next_token()
 {
     struct token *token = NULL;
@@ -381,6 +414,9 @@ struct token *read_next_token()
         break;
     case '"':
         token = token_make_string('"', '"');
+        break;
+    case '\'':
+        token = token_make_quote();
         break;
     case ' ':
     case '\t':
