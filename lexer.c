@@ -375,6 +375,45 @@ char lex_get_escape_char(char c){
     }
     return co;
 }
+void lexer_pop_token(){
+    vector_pop(lex_process->token_vec);
+}
+//判断哪些字符是16进制数中合法的字符
+bool is_hex_char(char c){
+    return (c>='0'&&c<='9')||(c>='a'&&c<='f')||(c>='A'&&c<='F');
+}
+//读取十六进制数的整条字符串
+const char* read_hex_number_str(){
+    struct buffer* buffer=buffer_create();
+    char c=peekc();
+    LEX_GETC_IF(buffer,c,is_hex_char(c));
+    //写入终止符
+    buffer_write(buffer,0x00);
+    return buffer_ptr(buffer);
+}
+//处理十六进制类型的token
+struct token* token_make_special_number_hexadecimal(){
+    //跳过'x'||'X'
+    nextc();
+    unsigned long number=0;
+    const char* number_str=read_hex_number_str();
+    number=strtoul(number_str,0,16);
+    return token_make_number_for_value(number);
+}
+//处理十六进制、八进制等特殊进制的数字
+struct token* token_make_special_number(){
+    struct token* token=NULL;
+    struct token* last_token=lexer_last_token();
+    //把识别符0x、0b、0h最前面的0去掉
+    lexer_pop_token();
+    
+    char c=peekc();
+    if(c=='x'||c=='X'){
+        token=token_make_special_number_hexadecimal();
+    }
+    
+    return token;
+}
 //处理单引号内包括的字符
 struct token* token_make_quote(){
     assert_next_char('\'');//确保下一个字符是单引号
@@ -411,6 +450,10 @@ struct token *read_next_token()
         break;
     SYMBOL_CASE:
         token= token_make_symbol();
+        break;
+    case 'x':
+    case 'X':
+        token = token_make_special_number();
         break;
     case '"':
         token = token_make_string('"', '"');
