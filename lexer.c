@@ -301,6 +301,10 @@ struct token* read_special_token(){
         return token_make_identifier_or_keyword();
     }
 }
+struct token* token_make_newline(){
+    nextc();
+    return token_create(&(struct token){.type=TOKEN_TYPE_NEWLINE});
+}
 struct token *read_next_token()
 {
     struct token *token = NULL;
@@ -322,6 +326,15 @@ struct token *read_next_token()
     case ' ':
     case '\t':
         token = handle_whitespace();
+        break;
+    case '\n':
+    //由于我是Windows系统，所以在编译遇到\r换行符时也要进行处理
+    //原代码中没有处理\r换行符，
+    //    即没有
+    //case '\r':
+    //    这一行
+    case '\r':
+        token=token_make_newline();
         break;
     case EOF:
         // 结束代码文本的全部词法分析
