@@ -400,16 +400,40 @@ struct token* token_make_special_number_hexadecimal(){
     number=strtoul(number_str,0,16);
     return token_make_number_for_value(number);
 }
+
+void lexer_validate_binary_string(const char* str){
+    size_t len=strlen(str);
+    for(int i=0;i<len;i++){
+        if(str[i]!='0'&&str[i]!='1'){
+            compiler_error(lex_process->compiler,"非法的字符'%c',二进制数只能由0和1组成");
+        }
+    }
+}
+struct token* token_make_number_binary(){
+    //跳过'b'
+    nextc();
+    unsigned long number=0;
+    const char* number_str=read_number_str();
+    lexer_validate_binary_string(number_str);
+    number=strtoul(number_str,0,2);
+    return token_make_number_for_value(number);
+}
 //处理十六进制、八进制等特殊进制的数字
 struct token* token_make_special_number(){
     struct token* token=NULL;
     struct token* last_token=lexer_last_token();
+    //如果没有前导零，说明是以'x'、'b'、'h'开头的变量名
+    if(!last_token||!(last_token->type==TOKEN_TYPE_NUMBER&&last_token->llnum==0)){
+        return token_make_identifier_or_keyword();
+    }
     //把识别符0x、0b、0h最前面的0去掉
     lexer_pop_token();
     
     char c=peekc();
     if(c=='x'||c=='X'){
         token=token_make_special_number_hexadecimal();
+    } else if(c=='b'||c=='B'){
+        token=token_make_number_binary();
     }
     
     return token;
@@ -451,6 +475,8 @@ struct token *read_next_token()
     SYMBOL_CASE:
         token= token_make_symbol();
         break;
+    case 'b':
+    case 'B':
     case 'x':
     case 'X':
         token = token_make_special_number();
