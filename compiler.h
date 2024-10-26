@@ -158,6 +158,10 @@ struct compile_process
         FILE* fp;
         const char* abs_path;
     } cfile;
+
+    //完成词法分析后的token数组
+    struct vector* token_vec;
+
     // ofile是编译后的输出文件
     FILE* ofile;
     
