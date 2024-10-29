@@ -167,6 +167,60 @@ struct compile_process
     
 };
 
+enum{
+    NODE_TYPE_EXPRESSION,
+    NODE_TYPE_EXPRESSION_PARENTHESES,
+    NODE_TYPE_NUMBER,
+    NODE_TYPE_IDENTIFIER,
+    NODE_TYPE_STRING,
+    NODE_TYPE_VARIABLE,
+    NODE_TYPE_VARIABLE_LIST,
+    NODE_TYPE_FUNCTION,
+    NODE_TYPE_BODY,
+    NODE_TYPE_STATMENT_RETURN,
+    NODE_TYPE_STATMENT_IF,
+    NODE_TYPE_STATMENT_ELSE,
+    NODE_TYPE_STATMENT_WHILE,
+    NODE_TYPE_STATMENT_DO_WHILE,
+    NODE_TYPE_STATMENT_FOR,
+    NODE_TYPE_STATMENT_BREAK,
+    NODE_TYPE_STATMENT_CONTINUE,
+    NODE_TYPE_STATMENT_SWITCH,
+    NODE_TYPE_STATMENT_CASE,
+    NODE_TYPE_STATMENT_DEFAULT,
+    NODE_TYPE_STATMENT_GOTO,
+
+    NODE_TYPE_NUARY,
+    NODE_TYPE_TENARY,
+    NODE_TYPE_LABEL,
+    NODE_TYPE_STRUCT,
+    NODE_TYPE_UNION,
+    NODE_TYPE_BRACKET,
+    NODE_TYPE_CAST,
+    NODE_TYPE_BLANK
+};
+
+struct node{
+    int type;
+    int flags;
+
+    struct pos pos;
+    struct node_binded{
+        //指向body node
+        struct node* owner;
+
+        //指向该node所在的function node
+        struct node* function;
+    } binded;
+
+    union{
+        char cval;
+        const char* sval;
+        unsigned int inum;
+        unsigned long lnum;
+        unsigned long long llnum;
+    };
+};
 
 int compile_file(const char *filename, const char *output_filename, int flags);
 struct compile_process* compile_process_create(const char* filename, const char* filename_out, int flags);
