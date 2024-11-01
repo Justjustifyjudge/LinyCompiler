@@ -33,3 +33,11 @@ struct node* node_pop(){
 
     return last_node;
 }
+
+struct node* node_create(struct node* _node){
+    struct node* node=malloc(sizeof(struct node));
+    memcpy(node,_node,sizeof(struct node));
+    #warning "此处应设置绑定的函数和绑定的对象"
+    node_push(node);
+    return node;
+}
