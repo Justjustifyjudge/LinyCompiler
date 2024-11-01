@@ -162,9 +162,19 @@ struct compile_process
     //完成词法分析后的token数组
     struct vector* token_vec;
 
+    //用来管理语法树节点的push&pop等操作（没太懂）
+    struct vector* node_vec;
+    //语法树的根节点
+    struct vector* node_tree_vec;
+
     // ofile是编译后的输出文件
     FILE* ofile;
     
+};
+
+enum{
+    PARSE_ALL_OK,
+    PARSE_GENERAL_ERROR
 };
 
 enum{
@@ -197,6 +207,7 @@ enum{
     NODE_TYPE_UNION,
     NODE_TYPE_BRACKET,
     NODE_TYPE_CAST,
+    //空类型，类似null，不存在语法中的类型
     NODE_TYPE_BLANK
 };
 
@@ -238,7 +249,7 @@ void* lex_process_private(struct lex_process* process);
 struct vector* lex_process_tokens(struct lex_process* process);
 
 int lex(struct lex_process* process);
-
+int parse(struct compile_process* process);
 struct lex_process* tokens_build_for_string(struct compile_process* compiler, const char* str);
 bool token_is_keyword(struct token *token, const char* value);
 

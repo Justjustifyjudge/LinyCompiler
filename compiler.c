@@ -43,6 +43,10 @@ int compile_file(const char *filename, const char *out_filename, int flags){
 
     process->token_vec=lex_process->token_vec;
     //语义分析
+    if(parse(process)!=PARSE_ALL_OK){
+        return COMPILOR_FAILED_WITH_ERRORS;
+    }
+    
     //代码生成
     return COMPILOR_FILE_COMPLETE_OK;
 } 
